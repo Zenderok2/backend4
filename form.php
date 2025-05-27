@@ -79,14 +79,14 @@ document.addEventListener("DOMContentLoaded", () => {
         data[key] = value;
       }
     });
-
+    console.log("Отправляем JSON:", JSON.stringify(data));
     try {
       const res = await fetch("api.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       });
-
+    
       const result = await res.json();
 
       if (result.login && result.pass) {
