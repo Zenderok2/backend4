@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = {};
 
     formData.forEach((value, key) => {
-      if (key === "lang") {
+      if (key === "lang[]") {
         if (!data.lang) data.lang = [];
         data.lang.push(value);
       } else {
