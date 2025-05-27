@@ -71,14 +71,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const formData = new FormData(form);
     const data = {};
 
-    formData.forEach((value, key) => {
-      if (key === "lang[]") {
-        if (!data.lang) data.lang = [];
-        data.lang.push(value);
-      } else {
-        data[key] = value;
-      }
-    });
+formData.forEach((value, key) => {
+  // Унифицируем имя поля
+  const fixedKey = key === "lang[]" ? "lang" : key;
+
+  if (fixedKey === "lang") {
+    if (!data.lang) data.lang = [];
+    data.lang.push(value);
+  } else {
+    data[fixedKey] = value;
+  }
+});
+
     console.log("Отправляем JSON:", JSON.stringify(data));
     try {
       const res = await fetch("api.php", {
