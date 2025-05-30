@@ -1,96 +1,80 @@
-<html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    .error {
-      border: 2px solid red;
-    }
-  </style>
-</head>
-<body>
-
 <?php
-if (!empty($messages)) {
-  print('<div id="messages">');
-  foreach ($messages as $msg)
-    print($msg);
-  print('</div>');
-}
-
-if (!empty($_SESSION['login'])) {
-  echo "<p>Вы вошли как <strong>{$_SESSION['login']}</strong>.</p>";
-  echo '<form method="post" action="logout.php">
-          <input type="submit" value="Выйти" />
-        </form>';
-}
-
 $all_langs = ['C', 'C++', 'Java', 'Python', 'JavaScript', 'PHP'];
 ?>
 
-<form id="mainForm" action="" method="POST">
+<form id="mainForm" action="" method="POST" class="form-container">
   <label>ФИО:</label><br />
-  <input name="fio" <?php if (!empty($errors['fio'])) print 'class="error"'; ?>
+  <input name="fio" class="<?= !empty($errors['fio']) ? 'error' : '' ?>"
          value="<?= htmlspecialchars($values['fio'] ?? '', ENT_QUOTES); ?>" /><br /><br />
 
   <label>Email:</label><br />
-  <input name="email" <?php if (!empty($errors['email'])) print 'class="error"'; ?>
+  <input name="email" class="<?= !empty($errors['email']) ? 'error' : '' ?>"
          value="<?= htmlspecialchars($values['email'] ?? '', ENT_QUOTES); ?>" /><br /><br />
 
   <label>Дата рождения:</label><br />
-  <input type="date" name="dob" <?php if (!empty($errors['dob'])) print 'class="error"'; ?>
+  <input type="date" name="dob" class="<?= !empty($errors['dob']) ? 'error' : '' ?>"
          value="<?= htmlspecialchars($values['dob'] ?? '', ENT_QUOTES); ?>" /><br /><br />
 
   <label>Телефон:</label><br />
-  <input name="phone" <?php if (!empty($errors['phone'])) print 'class="error"'; ?>
+  <input name="phone" class="<?= !empty($errors['phone']) ? 'error' : '' ?>"
          value="<?= htmlspecialchars($values['phone'] ?? '', ENT_QUOTES); ?>" /><br /><br />
 
   <label>Сообщение:</label><br />
-  <textarea name="bio" <?php if (!empty($errors['bio'])) print 'class="error"'; ?>><?= htmlspecialchars($values['bio'] ?? '', ENT_QUOTES); ?></textarea><br /><br />
+  <textarea name="bio" class="<?= !empty($errors['bio']) ? 'error' : '' ?>"><?= htmlspecialchars($values['bio'] ?? '', ENT_QUOTES); ?></textarea><br /><br />
 
   <label>Любимые языки программирования:</label><br />
   <?php foreach ($all_langs as $lang): ?>
     <label>
       <input type="checkbox" name="lang[]" value="<?= $lang ?>"
-        <?php if (!empty($values['lang']) && in_array($lang, $values['lang'])) echo 'checked'; ?>>
+        <?= !empty($values['lang']) && in_array($lang, $values['lang']) ? 'checked' : '' ?>>
       <?= $lang ?>
     </label><br />
   <?php endforeach; ?>
+  <?php if (!empty($errors['lang'])): ?>
+    <p class="error-text">Выберите хотя бы один язык.</p>
+  <?php endif; ?>
 
   <br />
   <input type="submit" value="Сохранить" />
 </form>
 
+<?php if (!empty($_SESSION['login'])): ?>
+  <p>Вы вошли как <strong><?= $_SESSION['login'] ?></strong>.</p>
+  <form method="post" action="logout.php">
+    <input type="submit" value="Выйти" />
+  </form>
+<?php endif; ?>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  if (!window.fetch) return;
-
   const form = document.getElementById("mainForm");
+  if (!window.fetch || !form) return;
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const formData = new FormData(form);
     const data = {};
 
-formData.forEach((value, key) => {
-  // Унифицируем имя поля
-  const fixedKey = key === "lang[]" ? "lang" : key;
-
-  if (fixedKey === "lang") {
-    if (!data.lang) data.lang = [];
-    data.lang.push(value);
-  } else {
-    data[fixedKey] = value;
-  }
-});
+    formData.forEach((value, key) => {
+      const fixedKey = key === "lang[]" ? "lang" : key;
+      if (fixedKey === "lang") {
+        if (!data.lang) data.lang = [];
+        data.lang.push(value);
+      } else {
+        data[fixedKey] = value;
+      }
+    });
 
     console.log("Отправляем JSON:", JSON.stringify(data));
+
     try {
       const res = await fetch("api.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       });
-    
+
       const result = await res.json();
 
       if (result.login && result.pass) {
@@ -108,6 +92,3 @@ formData.forEach((value, key) => {
   });
 });
 </script>
-
-</body>
-</html>
